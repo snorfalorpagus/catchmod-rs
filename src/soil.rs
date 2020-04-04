@@ -1,7 +1,7 @@
 pub struct SoilMoistureDeficitStore {
-    direct_percolation: f64,
-    potential_drying_constant: f64,
-    gradient_drying_curve: f64,
+    pub direct_percolation: f64,
+    pub potential_drying_constant: f64,
+    pub gradient_drying_curve: f64,
 }
 
 impl SoilMoistureDeficitStore {

@@ -1,5 +1,5 @@
 pub struct LinearStore {
-    constant: f64,
+    pub constant: f64,
 }
 
 impl LinearStore {

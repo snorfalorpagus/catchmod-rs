@@ -2,7 +2,7 @@ const ZERO: f64 = 1e-9;
 const T: f64 = 1.0;
 
 pub struct NonLinearStore {
-    constant: f64,
+    pub constant: f64,
 }
 
 impl NonLinearStore {
