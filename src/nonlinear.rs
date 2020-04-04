@@ -22,7 +22,7 @@ impl NonLinearStore {
         } else {
             self.case_d(inflow, previous_outflow)
         };
-        
+
         return ((previous_outflow + q2) / 2.0, q2);
     }
 
@@ -40,7 +40,8 @@ impl NonLinearStore {
     }
 
     fn case_c(&self, inflow: f64, previous_outflow: f64) -> f64 {
-        let a = (previous_outflow.sqrt() - inflow.sqrt()) / (previous_outflow.sqrt() + inflow.sqrt());
+        let a =
+            (previous_outflow.sqrt() - inflow.sqrt()) / (previous_outflow.sqrt() + inflow.sqrt());
         let b = -2.0 * T * (inflow / self.constant).sqrt();
         inflow * ((1.0 + a * b.exp()) / (1.0 - a * b.exp())).powi(2)
     }
@@ -64,21 +65,21 @@ mod tests {
 
     #[test]
     fn zero_constant() {
-        let store = NonLinearStore{ constant: 0.0 };
+        let store = NonLinearStore { constant: 0.0 };
         let (outflow, _) = store.step(999.0, 0.0);
         assert!(abs_diff_eq!(outflow, 999.0, epsilon = 0.0001))
     }
 
     #[test]
     fn near_zero_constant() {
-        let store = NonLinearStore{ constant: 1e-12 };
+        let store = NonLinearStore { constant: 1e-12 };
         let (outflow, _) = store.step(999.0, 0.0);
         assert!(abs_diff_eq!(outflow, 999.0, epsilon = 0.0001))
     }
 
     #[test]
     fn case_d() {
-        let store = NonLinearStore{ constant: 0.3 };
+        let store = NonLinearStore { constant: 0.3 };
         let (outflow, _) = store.step(50.0, 10.0);
         assert!(abs_diff_eq!(outflow, 29.9999, epsilon = 0.0001))
     }
