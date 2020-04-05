@@ -2,20 +2,19 @@ pub struct SoilMoistureDeficitStore {
     pub direct_percolation: f64,
     pub potential_drying_constant: f64,
     pub gradient_drying_curve: f64,
+    
+    pub upper_deficit: f64,
+    pub lower_deficit: f64,
 }
 
 impl SoilMoistureDeficitStore {
     pub fn step(
-        &self,
+        &mut self,
         rainfall: f64,
         pet: f64,
-        upper_deficit: f64,
-        lower_deficit: f64,
-    ) -> (f64, f64, f64) {
+    ) -> f64 {
         let mut effective_rainfall = rainfall - pet;
         let mut percolation = 0.0;
-        let mut new_upper_deficit: f64 = upper_deficit;
-        let mut new_lower_deficit: f64 = lower_deficit;
 
         if effective_rainfall > 0.0 {
             // Wetting
@@ -24,21 +23,21 @@ impl SoilMoistureDeficitStore {
             percolation += direct_percolation;
             effective_rainfall -= direct_percolation;
 
-            if new_upper_deficit > effective_rainfall {
-                new_upper_deficit -= effective_rainfall;
+            if self.upper_deficit > effective_rainfall {
+                self.upper_deficit -= effective_rainfall;
                 effective_rainfall = 0.0;
-            } else if new_upper_deficit > 0.0 {
-                effective_rainfall -= new_upper_deficit;
-                new_upper_deficit = 0.0;
+            } else if self.upper_deficit > 0.0 {
+                effective_rainfall -= self.upper_deficit;
+                self.upper_deficit = 0.0;
             }
 
             if effective_rainfall > 0.0 {
-                if new_lower_deficit > effective_rainfall {
-                    new_lower_deficit -= effective_rainfall;
+                if self.lower_deficit > effective_rainfall {
+                    self.lower_deficit -= effective_rainfall;
                     effective_rainfall = 0.0;
-                } else if new_lower_deficit > 0.0 {
-                    effective_rainfall -= new_lower_deficit;
-                    new_lower_deficit = 0.0;
+                } else if self.lower_deficit > 0.0 {
+                    effective_rainfall -= self.lower_deficit;
+                    self.lower_deficit = 0.0;
                 }
             }
 
@@ -48,23 +47,23 @@ impl SoilMoistureDeficitStore {
             }
         } else {
             // Drying
-            if new_upper_deficit < self.potential_drying_constant + effective_rainfall {
+            if self.upper_deficit < self.potential_drying_constant + effective_rainfall {
                 // Upper deficit sufficiently less than the PDC threshold, just increase the deficit
-                new_upper_deficit -= effective_rainfall;
+                self.upper_deficit -= effective_rainfall;
                 effective_rainfall = 0.0;
-            } else if new_upper_deficit < self.potential_drying_constant {
+            } else if self.upper_deficit < self.potential_drying_constant {
                 // Upper deficit near to PDC threshold
-                effective_rainfall += self.potential_drying_constant - new_upper_deficit;
-                new_upper_deficit = self.potential_drying_constant
+                effective_rainfall += self.potential_drying_constant - self.upper_deficit;
+                self.upper_deficit = self.potential_drying_constant
             }
             // If there is remaining negative effective rainfall dry the lower store at reduced rate
             if effective_rainfall < 0.0 {
                 // There is no limit to the size of the lower store
-                new_lower_deficit -= effective_rainfall * self.gradient_drying_curve;
+                self.lower_deficit -= effective_rainfall * self.gradient_drying_curve;
             }
         }
 
-        (percolation, new_upper_deficit, new_lower_deficit)
+        percolation
     }
 }
 
@@ -74,24 +73,28 @@ mod tests {
 
     #[test]
     fn zero_storage() {
-        let soil = SoilMoistureDeficitStore {
+        let mut soil = SoilMoistureDeficitStore {
             direct_percolation: 1.0,
             potential_drying_constant: 0.0,
             gradient_drying_curve: 0.0,
+            upper_deficit: 0.0,
+            lower_deficit: 0.0,
         };
-        let (percolation, _, _) = soil.step(50.0, 15.0, 0.0, 0.0);
+        let percolation = soil.step(50.0, 15.0);
         assert!(abs_diff_eq!(percolation, 35.0, epsilon = 0.0001))
     }
 
     #[test]
     fn negative_effective_rainfall() {
         // When PET > rainfall there is zero percolation
-        let soil = SoilMoistureDeficitStore {
+        let mut soil = SoilMoistureDeficitStore {
             direct_percolation: 1.0,
             potential_drying_constant: 0.0,
             gradient_drying_curve: 0.0,
+            upper_deficit: 0.0,
+            lower_deficit: 0.0,
         };
-        let (percolation, _, _) = soil.step(50.0, 100.0, 0.0, 0.0);
+        let percolation = soil.step(50.0, 100.0);
         assert!(abs_diff_eq!(percolation, 0.0, epsilon = 0.0001))
     }
 }

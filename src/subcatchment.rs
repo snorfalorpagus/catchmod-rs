@@ -4,16 +4,16 @@ use crate::soil::SoilMoistureDeficitStore;
 
 pub struct Subcatchment<'a> {
     pub name: &'a str,
-    soil: &'a SoilMoistureDeficitStore,
-    linear: &'a LinearStore,
-    nonlinear: &'a NonLinearStore,
+    soil: &'a mut SoilMoistureDeficitStore,
+    linear: &'a mut LinearStore,
+    nonlinear: &'a mut NonLinearStore,
 }
 
 impl Subcatchment<'_> {
-    pub fn step(&self, rainfall: f64, pet: f64) -> f64 {
-        let (percolation, upper_deficit, lower_deficit) = self.soil.step(rainfall, pet, 0.0, 0.0);
-        let (linear_outflow, previous_outflow) = self.linear.step(percolation, 0.0);
-        let (nonlinear_outflow, previous_outflow) = self.nonlinear.step(linear_outflow, 0.0);
+    pub fn step(&mut self, rainfall: f64, pet: f64) -> f64 {
+        let percolation = self.soil.step(rainfall, pet);
+        let linear_outflow = self.linear.step(percolation);
+        let nonlinear_outflow = self.nonlinear.step(linear_outflow);
         nonlinear_outflow
     }
 }
@@ -24,15 +24,17 @@ mod tests {
 
     #[test]
     fn test_subcatchment() {
-        let c = Subcatchment {
+        let mut c = Subcatchment {
             name: "test",
-            soil: &SoilMoistureDeficitStore {
+            soil: &mut SoilMoistureDeficitStore {
                 direct_percolation: 1.0,
                 potential_drying_constant: 0.0,
                 gradient_drying_curve: 0.0,
+                upper_deficit: 0.0,
+                lower_deficit: 0.0,
             },
-            linear: &LinearStore { constant: 0.0 },
-            nonlinear: &NonLinearStore { constant: 0.0 },
+            linear: &mut LinearStore { constant: 0.0, previous_outflow: 0.0 },
+            nonlinear: &mut NonLinearStore { constant: 0.0, previous_outflow: 0.0 },
         };
         let outflow = c.step(50.0, 15.0);
         assert!(abs_diff_eq!(outflow, 35.0, epsilon = 0.0001))
