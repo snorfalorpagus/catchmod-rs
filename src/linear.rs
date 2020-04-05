@@ -30,14 +30,20 @@ mod tests {
 
     #[test]
     fn test_with_constant() {
-        let mut store = LinearStore { constant: 30.0, previous_outflow: 0.0 };
+        let mut store = LinearStore {
+            constant: 30.0,
+            previous_outflow: 0.0,
+        };
         let average_outflow = store.step(10.0);
         assert!(abs_diff_eq!(average_outflow, 0.1648, epsilon = 0.0001)) // TODO: check result
     }
 
     #[test]
     fn test_without_constant() {
-        let mut store = LinearStore { constant: 0.0, previous_outflow: 0.0 };
+        let mut store = LinearStore {
+            constant: 0.0,
+            previous_outflow: 0.0,
+        };
         let average_outflow = store.step(10.0);
         assert!(abs_diff_eq!(average_outflow, 10.0, epsilon = 0.0001)) // TODO: check result
     }

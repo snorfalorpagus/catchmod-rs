@@ -42,8 +42,8 @@ impl NonLinearStore {
     }
 
     fn case_c(&mut self, inflow: f64) -> f64 {
-        let a =
-            (self.previous_outflow.sqrt() - inflow.sqrt()) / (self.previous_outflow.sqrt() + inflow.sqrt());
+        let a = (self.previous_outflow.sqrt() - inflow.sqrt())
+            / (self.previous_outflow.sqrt() + inflow.sqrt());
         let b = -2.0 * T * (inflow / self.constant).sqrt();
         inflow * ((1.0 + a * b.exp()) / (1.0 - a * b.exp())).powi(2)
     }
@@ -67,21 +67,30 @@ mod tests {
 
     #[test]
     fn zero_constant() {
-        let mut store = NonLinearStore { constant: 0.0, previous_outflow: 0.0 };
+        let mut store = NonLinearStore {
+            constant: 0.0,
+            previous_outflow: 0.0,
+        };
         let outflow = store.step(999.0);
         assert!(abs_diff_eq!(outflow, 999.0, epsilon = 0.0001))
     }
 
     #[test]
     fn near_zero_constant() {
-        let mut store = NonLinearStore { constant: 1e-12, previous_outflow: 0.0 };
+        let mut store = NonLinearStore {
+            constant: 1e-12,
+            previous_outflow: 0.0,
+        };
         let outflow = store.step(999.0);
         assert!(abs_diff_eq!(outflow, 999.0, epsilon = 0.0001))
     }
 
     #[test]
     fn case_d() {
-        let mut store = NonLinearStore { constant: 30.0, previous_outflow: 10.0 };
+        let mut store = NonLinearStore {
+            constant: 30.0,
+            previous_outflow: 10.0,
+        };
         let outflow = store.step(50.0);
         assert!(abs_diff_eq!(outflow, 27.27135, epsilon = 0.0001))
     }

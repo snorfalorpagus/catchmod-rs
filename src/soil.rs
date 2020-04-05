@@ -2,17 +2,13 @@ pub struct SoilMoistureDeficitStore {
     pub direct_percolation: f64,
     pub potential_drying_constant: f64,
     pub gradient_drying_curve: f64,
-    
+
     pub upper_deficit: f64,
     pub lower_deficit: f64,
 }
 
 impl SoilMoistureDeficitStore {
-    pub fn step(
-        &mut self,
-        rainfall: f64,
-        pet: f64,
-    ) -> f64 {
+    pub fn step(&mut self, rainfall: f64, pet: f64) -> f64 {
         let mut effective_rainfall = rainfall - pet;
         let mut percolation = 0.0;
 

@@ -4,9 +4,9 @@ use crate::soil::SoilMoistureDeficitStore;
 
 pub struct Subcatchment<'a> {
     pub name: &'a str,
-    soil: &'a mut SoilMoistureDeficitStore,
-    linear: &'a mut LinearStore,
-    nonlinear: &'a mut NonLinearStore,
+    pub soil: &'a mut SoilMoistureDeficitStore,
+    pub linear: &'a mut LinearStore,
+    pub nonlinear: &'a mut NonLinearStore,
 }
 
 impl Subcatchment<'_> {
@@ -33,8 +33,14 @@ mod tests {
                 upper_deficit: 0.0,
                 lower_deficit: 0.0,
             },
-            linear: &mut LinearStore { constant: 0.0, previous_outflow: 0.0 },
-            nonlinear: &mut NonLinearStore { constant: 0.0, previous_outflow: 0.0 },
+            linear: &mut LinearStore {
+                constant: 0.0,
+                previous_outflow: 0.0,
+            },
+            nonlinear: &mut NonLinearStore {
+                constant: 0.0,
+                previous_outflow: 0.0,
+            },
         };
         let outflow = c.step(50.0, 15.0);
         assert!(abs_diff_eq!(outflow, 35.0, epsilon = 0.0001))
